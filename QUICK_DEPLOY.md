@@ -250,3 +250,4 @@ curl $NEXT_PUBLIC_SUPABASE_URL
 
 **Ready? Tell me which option and provide the necessary details! 🚀**
 
+

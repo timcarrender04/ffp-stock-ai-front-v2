@@ -124,3 +124,4 @@ echo "2. Verify files are uploaded"
 echo "3. Deploy via Portainer using image: ffp-stock-ai-frontend:latest"
 echo ""
 
+

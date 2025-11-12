@@ -8,7 +8,7 @@ services:
       dockerfile: Dockerfile
     container_name: ffp-stock-ai-frontend
     ports:
-      - "3000:3000"
+      - "3075:3075"
     environment:
       # Supabase Configuration
       NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL}
@@ -26,7 +26,7 @@ services:
       - ffp-network
     
     healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000"]
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3075"]
       interval: 30s
       timeout: 10s
       retries: 3
