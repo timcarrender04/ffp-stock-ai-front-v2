@@ -1,0 +1,97 @@
+@import "tailwindcss";
+
+@config "../tailwind.config.js";
+
+:root {
+  color-scheme: dark;
+  --finance-black: #060708;
+  --finance-surface: #0c1115;
+  --finance-slate: #101821;
+  --finance-green: #00c16a;
+}
+
+body {
+  background: var(--finance-black);
+  color: #f5f9f7;
+}
+
+.text-finance-green {
+  color: var(--finance-green);
+}
+
+.bg-finance-green {
+  background-color: var(--finance-green);
+}
+
+.bg-finance-surface {
+  background-color: var(--finance-surface);
+}
+
+.bg-finance-black {
+  background-color: var(--finance-black);
+}
+
+.from-finance-black {
+  --tw-gradient-from: var(--finance-black);
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgba(6, 7, 8, 0));
+}
+
+.via-black {
+  --tw-gradient-stops: var(--tw-gradient-from), rgb(0 0 0), var(--tw-gradient-to, rgba(0, 0, 0, 0));
+}
+
+.to-finance-slate {
+  --tw-gradient-to: var(--finance-slate);
+}
+
+.border-finance-green-20 {
+  border-color: color-mix(in srgb, var(--finance-green) 20%, transparent);
+}
+
+.border-finance-green-25 {
+  border-color: color-mix(in srgb, var(--finance-green) 25%, transparent);
+}
+
+.border-finance-green-30 {
+  border-color: color-mix(in srgb, var(--finance-green) 30%, transparent);
+}
+
+.border-finance-green-40 {
+  border-color: color-mix(in srgb, var(--finance-green) 40%, transparent);
+}
+
+.border-finance-green-50 {
+  border-color: color-mix(in srgb, var(--finance-green) 50%, transparent);
+}
+
+.border-finance-green-60 {
+  border-color: color-mix(in srgb, var(--finance-green) 60%, transparent);
+}
+
+.border-finance-green {
+  border-color: var(--finance-green);
+}
+
+.bg-finance-surface-60 {
+  background-color: color-mix(in srgb, var(--finance-surface) 60%, transparent);
+}
+
+.bg-finance-surface-70 {
+  background-color: color-mix(in srgb, var(--finance-surface) 70%, transparent);
+}
+
+.bg-finance-surface-80 {
+  background-color: color-mix(in srgb, var(--finance-surface) 80%, transparent);
+}
+
+.bg-finance-black-80 {
+  background-color: color-mix(in srgb, var(--finance-black) 80%, transparent);
+}
+
+.text-finance-green-70 {
+  color: color-mix(in srgb, var(--finance-green) 70%, white 30%);
+}
+
+.text-finance-green-80 {
+  color: color-mix(in srgb, var(--finance-green) 80%, white 20%);
+}

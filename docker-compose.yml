@@ -1,0 +1,45 @@
+version: '3.9'
+
+services:
+  # FFP Stock AI Frontend
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ffp-stock-ai-frontend
+    ports:
+      - "3000:3000"
+    environment:
+      # Supabase Configuration
+      NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${NEXT_PUBLIC_SUPABASE_ANON_KEY}
+      
+      # Backend API Configuration
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8000}
+      
+      # Node environment
+      NODE_ENV: production
+      NEXT_TELEMETRY_DISABLED: 1
+    
+    restart: unless-stopped
+    networks:
+      - ffp-network
+    
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    
+    # Logging configuration
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+networks:
+  ffp-network:
+    driver: bridge
+

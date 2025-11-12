@@ -1,0 +1,56 @@
+# Git
+.git
+.gitignore
+
+# Node
+node_modules
+npm-debug.log
+yarn-error.log
+.pnpm-debug.log
+
+# Build artifacts
+.next
+out
+dist
+build
+
+# Development
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.vscode
+.idea
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Testing
+coverage
+.nyc_output
+jest
+
+# Docs
+README.md
+CHANGELOG.md
+LICENSE
+
+# Dependencies lock files (we use npm ci)
+yarn.lock
+pnpm-lock.yaml
+
+# Docker
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# CI/CD
+.github
+.gitlab-ci.yml
+.travis.yml
+
+# Other
+.next/cache
+.env.*.local
+
