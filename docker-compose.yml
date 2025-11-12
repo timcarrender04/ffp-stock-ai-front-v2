@@ -1,12 +1,9 @@
-version: '3.9'
-
 services:
   # FFP Stock AI Frontend
   frontend:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: ffp-stock-ai-frontend
     ports:
       - "3075:3075"
     environment:
