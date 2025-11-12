@@ -43,7 +43,7 @@ ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 
 # Expose port
-EXPOSE 3000
+EXPOSE 3075
 
 # Switch to non-root user
 USER nextjs
@@ -52,9 +52,9 @@ USER nextjs
 ENTRYPOINT ["dumb-init", "--"]
 
 # Start Next.js server
-CMD ["node_modules/.bin/next", "start"]
+CMD ["node_modules/.bin/next", "start", "-p", "3075"]
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-    CMD node -e "require('http').get('http://localhost:3000', (r) => {if (r.statusCode !== 200) throw new Error(r.statusCode)})"
+    CMD node -e "require('http').get('http://localhost:3075', (r) => {if (r.statusCode !== 200) throw new Error(r.statusCode)})"
 
