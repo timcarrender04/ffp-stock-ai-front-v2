@@ -5,17 +5,19 @@ services:
       context: .
       dockerfile: Dockerfile
       args:
-        NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL}
+        NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL:-http://host.docker.internal:54321}
         NEXT_PUBLIC_SUPABASE_ANON_KEY: ${NEXT_PUBLIC_SUPABASE_ANON_KEY}
         NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://host.docker.internal:8000}
+        SUPABASE_URL: ${SUPABASE_URL:-http://host.docker.internal:54321}
     command: ["node_modules/.bin/next", "start", "-p", "3075"]
     ports:
       - "3075:3075"
     environment:
       PORT: 3075
       # Supabase Configuration
-      NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL}
+      NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL:-http://host.docker.internal:54321}
       NEXT_PUBLIC_SUPABASE_ANON_KEY: ${NEXT_PUBLIC_SUPABASE_ANON_KEY}
+      SUPABASE_URL: ${SUPABASE_URL:-http://host.docker.internal:54321}
       
       # Backend API Configuration
       NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://host.docker.internal:8000}
