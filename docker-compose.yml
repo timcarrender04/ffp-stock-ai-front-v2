@@ -4,6 +4,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    command: ["node_modules/.bin/next", "start", "-p", "3075"]
     ports:
       - "3075:3075"
     environment:
