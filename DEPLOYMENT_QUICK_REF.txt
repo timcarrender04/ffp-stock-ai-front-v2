@@ -1,0 +1,161 @@
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                                                                              ║
+║         FFP STOCK AI FRONTEND - QUICK REFERENCE CARD                        ║
+║                                                                              ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+🚀 DEPLOYMENT STATUS: PHASE 1 COMPLETE ✅
+
+GitHub Repository: https://github.com/timcarrender04/ffp-stock-ai-front-v2
+Docker Image: ffp-stock-ai-frontend:latest (952MB)
+
+══════════════════════════════════════════════════════════════════════════════
+
+📋 PORTAINER DEPLOYMENT CHECKLIST
+
+[ ] 1. Get Supabase credentials from https://app.supabase.com → Settings → API
+[ ] 2. Open Portainer: http://your-server:9000
+[ ] 3. Click: Containers → Create Container
+[ ] 4. Enter Name: ffp-stock-ai-frontend
+[ ] 5. Enter Image: ffp-stock-ai-frontend:latest
+[ ] 6. Port mapping: 3000:3000
+[ ] 7. Click "Env" and add:
+        NEXT_PUBLIC_SUPABASE_URL=[your_url]
+        NEXT_PUBLIC_SUPABASE_ANON_KEY=[your_key]
+        NEXT_PUBLIC_API_URL=http://your-backend:8000
+        NODE_ENV=production
+[ ] 8. Restart Policy: Always
+[ ] 9. Click Deploy the container
+[ ] 10. Verify status: Running + Healthy
+
+══════════════════════════════════════════════════════════════════════════════
+
+🔑 REQUIRED CREDENTIALS
+
+NEXT_PUBLIC_SUPABASE_URL=
+Get from: https://app.supabase.com → Settings → API → Project URL
+
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
+Get from: https://app.supabase.com → Settings → API → Anon Key
+
+NEXT_PUBLIC_API_URL= (optional)
+Your backend API URL (e.g., http://localhost:8000)
+
+══════════════════════════════════════════════════════════════════════════════
+
+🧪 LOCAL TESTING (before Portainer)
+
+cd /home/ert/projects/web-apps/ffp-stock-ai-front-v2
+docker-compose up -d
+curl http://localhost:3000
+docker logs ffp-stock-ai-frontend
+docker-compose down
+
+══════════════════════════════════════════════════════════════════════════════
+
+🔄 UPDATE & REDEPLOY
+
+# 1. Make code changes locally
+nano app/page.tsx  (or edit any file)
+
+# 2. Commit and push
+git add .
+git commit -m "feat: your description"
+git push origin master
+
+# 3. Rebuild Docker image
+docker build -t ffp-stock-ai-frontend:latest .
+
+# 4. In Portainer:
+#    - Stop old container
+#    - Delete old container
+#    - Create new container with new image
+
+══════════════════════════════════════════════════════════════════════════════
+
+📚 DOCUMENTATION FILES
+
+QUICK_DEPLOY.md ............... 5-minute deployment guide
+DOCKER_DEPLOYMENT.md ......... Comprehensive Docker guide
+DEPLOYMENT_CHECKLIST.md ...... Full deployment checklist
+DEPLOYMENT_COMPLETE.md ....... Current status & next steps
+GIT_SETUP.md ................. Git operations guide
+
+══════════════════════════════════════════════════════════════════════════════
+
+🐛 TROUBLESHOOTING
+
+CONTAINER WON'T START:
+  docker logs ffp-stock-ai-frontend
+  Check: Are all env vars set?
+
+PORT ALREADY IN USE:
+  Use different port in Portainer (e.g., 3001 → 3000)
+  Or: docker ps | grep 3000 (find what's using it)
+
+SUPABASE CONNECTION FAILS:
+  Verify NEXT_PUBLIC_SUPABASE_URL is correct
+  Verify NEXT_PUBLIC_SUPABASE_ANON_KEY is correct
+  Check network connectivity to Supabase
+
+CAN'T ACCESS FRONTEND:
+  Try: curl http://localhost:3000
+  Check firewall port 3000
+  Check Portainer port mapping
+
+══════════════════════════════════════════════════════════════════════════════
+
+📊 QUICK STATS
+
+Git Commits: 1
+Files Tracked: 75
+Docker Image Size: 952 MB
+Next.js Pages: 14 static
+Build Time: ~30-60 seconds
+Container Memory: ~100-150 MB
+Container CPU: Minimal at idle
+
+══════════════════════════════════════════════════════════════════════════════
+
+✨ COMMANDS CHEAT SHEET
+
+# View repo
+gh repo view timcarrender04/ffp-stock-ai-front-v2 --web
+
+# Docker status
+docker images | grep ffp-stock
+docker ps -a | grep ffp-stock
+
+# Git operations
+git status
+git log --oneline
+git push origin master
+
+# Local testing
+docker-compose up -d
+docker-compose logs -f
+docker-compose down
+
+# Rebuild
+docker build -t ffp-stock-ai-frontend:latest .
+
+# Cleanup
+docker system prune -a
+docker volume prune
+
+══════════════════════════════════════════════════════════════════════════════
+
+🎯 NEXT ACTION
+
+Deploy to Portainer using the checklist above ⬆️
+
+Estimated time: 5 minutes
+Success indicator: Application accessible at http://your-server:3000
+
+══════════════════════════════════════════════════════════════════════════════
+
+Created: November 12, 2025
+Status: Phase 1 Complete - Ready for Phase 2 Deployment
+Account: timcarrender04
+Repository: ffp-stock-ai-front-v2
+

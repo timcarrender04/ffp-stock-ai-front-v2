@@ -2,12 +2,18 @@
 
 Moonshot internal dashboards powered by Next.js 15 (App Router), Supabase authentication, and HeroUI.
 
+**Status**: ✅ Production Ready | 🚀 Deployed on GitHub  
+**Repository**: https://github.com/timcarrender04/ffp-stock-ai-front-v2  
+**Docker Image**: `ffp-stock-ai-frontend:latest`
+
 ## Stack
 
 - Next.js 15 (App Router, server actions)
 - Supabase (auth + PostgREST data)
 - HeroUI v2 + Tailwind CSS
 - TypeScript / ESLint / Prettier
+- Docker (multi-stage production build)
+- Portainer-ready deployment
 
 ## Getting Started
 
@@ -53,6 +59,35 @@ You can log in via `/login` using those credentials. Run the reset command again
 - `npm run build` – production build
 - `npm start` – serve the built app
 - `npm run lint` – run ESLint with `--fix`
+
+## Deployment
+
+### Docker Deployment (Recommended)
+
+**Local testing:**
+```bash
+docker-compose up -d
+curl http://localhost:3000
+docker-compose down
+```
+
+**Production (Portainer):**
+1. Open Portainer: `http://your-server:9000`
+2. Containers → Create Container
+3. Image: `ffp-stock-ai-frontend:latest`
+4. Port: 3000:3000
+5. Environment variables:
+   - `NEXT_PUBLIC_SUPABASE_URL` (from Supabase dashboard)
+   - `NEXT_PUBLIC_SUPABASE_ANON_KEY` (from Supabase dashboard)
+   - `NEXT_PUBLIC_API_URL` (optional, your backend API)
+6. Click Deploy!
+
+### Documentation
+
+- **QUICK_DEPLOY.md** – 5-minute deployment guide
+- **DOCKER_DEPLOYMENT.md** – Comprehensive Docker guide
+- **DEPLOYMENT_CHECKLIST.md** – Full deployment checklist
+- **DEPLOYMENT_QUICK_REF.txt** – Quick reference card
 
 ## License
 
