@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Link from "next/link";
 import { Icon } from "@iconify/react";
 import {
   Dropdown,
@@ -12,6 +13,7 @@ import { Spinner } from "@heroui/spinner";
 import { User } from "@heroui/user";
 
 import { createClient } from "@/lib/supabase/client";
+import { AlpacaSettingsModal } from "@/components/trading/AlpacaSettingsModal";
 
 type SessionUser = {
   email: string;
@@ -23,6 +25,7 @@ export function UserMenu() {
   const supabase = React.useMemo(() => createClient(), []);
   const [user, setUser] = React.useState<SessionUser | null>(null);
   const [isLoading, setIsLoading] = React.useState(true);
+  const [isAlpacaSettingsOpen, setIsAlpacaSettingsOpen] = React.useState(false);
 
   React.useEffect(() => {
     let isMounted = true;
@@ -86,6 +89,10 @@ export function UserMenu() {
     window.location.href = "/login";
   }, [supabase]);
 
+  const handleAlpacaClick = React.useCallback(() => {
+    setIsAlpacaSettingsOpen(true);
+  }, []);
+
   if (isLoading) {
     return (
       <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-finance-green-30/60 bg-black/40">
@@ -116,44 +123,71 @@ export function UserMenu() {
     : user.email.slice(0, 2).toUpperCase();
 
   return (
-    <Dropdown placement="bottom-end">
-      <DropdownTrigger>
-        <button className="rounded-2xl border border-finance-green-30 bg-black/30 px-2 py-1 text-left transition hover:border-finance-green-60">
-          <User
-            avatarProps={{
-              src: user.avatarUrl,
-              name: initials,
-              className: "border border-finance-green-60 bg-finance-surface",
-            }}
-            className="max-w-[200px] text-left text-white"
-            description={user.email}
-            name={user.fullName ?? user.email}
-          />
-        </button>
-      </DropdownTrigger>
-      <DropdownMenu
-        aria-label="User menu"
-        className="min-w-[220px]"
-        variant="flat"
-      >
-        <DropdownItem key="email" isReadOnly className="cursor-default">
-          <div className="flex flex-col gap-1 text-xs">
-            <span className="text-zinc-400">Signed in as</span>
-            <span className="font-semibold text-white">{user.email}</span>
-          </div>
-        </DropdownItem>
-        <DropdownItem
-          key="logout"
-          className="text-sm"
-          color="danger"
-          onPress={handleSignOut}
+    <>
+      <Dropdown placement="bottom-end">
+        <DropdownTrigger>
+          <button className="rounded-2xl border border-finance-green-30 bg-black/30 px-2 py-1 text-left transition hover:border-finance-green-60">
+            <User
+              avatarProps={{
+                src: user.avatarUrl,
+                name: initials,
+                className: "border border-finance-green-60 bg-finance-surface",
+              }}
+              className="max-w-[200px] text-left text-white"
+              description={user.email}
+              name={user.fullName ?? user.email}
+            />
+          </button>
+        </DropdownTrigger>
+        <DropdownMenu
+          aria-label="User menu"
+          className="min-w-[220px]"
+          variant="flat"
         >
-          <div className="flex items-center gap-2">
-            <Icon className="text-base" icon="solar:logout-2-line-duotone" />
-            Sign out
-          </div>
-        </DropdownItem>
-      </DropdownMenu>
-    </Dropdown>
+          <DropdownItem key="email" isReadOnly className="cursor-default">
+            <div className="flex flex-col gap-1 text-xs">
+              <span className="text-zinc-400">Signed in as</span>
+              <span className="font-semibold text-white">{user.email}</span>
+            </div>
+          </DropdownItem>
+          <DropdownItem
+            key="alpaca"
+            className="text-sm"
+            onPress={handleAlpacaClick}
+          >
+            <div className="flex items-center gap-2">
+              <Icon className="text-base" icon="solar:chart-2-bold" />
+              Alpaca Integration
+            </div>
+          </DropdownItem>
+          <DropdownItem
+            key="analytics"
+            as={Link}
+            className="text-sm"
+            href="/analytics"
+          >
+            <div className="flex items-center gap-2">
+              <Icon className="text-base" icon="solar:graph-up-bold" />
+              Trading Analytics
+            </div>
+          </DropdownItem>
+          <DropdownItem
+            key="logout"
+            className="text-sm"
+            color="danger"
+            onPress={handleSignOut}
+          >
+            <div className="flex items-center gap-2">
+              <Icon className="text-base" icon="solar:logout-2-line-duotone" />
+              Sign out
+            </div>
+          </DropdownItem>
+        </DropdownMenu>
+      </Dropdown>
+      <AlpacaSettingsModal
+        isOpen={isAlpacaSettingsOpen}
+        onClose={() => setIsAlpacaSettingsOpen(false)}
+      />
+    </>
   );
 }

@@ -1,28 +1,39 @@
 services:
-  # FFP Stock AI Frontend
   frontend:
     build:
       context: .
       dockerfile: Dockerfile
       args:
-        NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL:-http://host.docker.internal:54321}
+        # Browser-accessible URL (use HTTPS public URL for production, localhost for dev)
+        NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL:-https://supabase.ffpstock.app}
         NEXT_PUBLIC_SUPABASE_ANON_KEY: ${NEXT_PUBLIC_SUPABASE_ANON_KEY}
-        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://host.docker.internal:8000}
-        SUPABASE_URL: ${SUPABASE_URL:-http://host.docker.internal:54321}
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-https://api.ffpstock.app}
+        NEXT_PUBLIC_AI_CHAT_URL: ${NEXT_PUBLIC_AI_CHAT_URL:-https://ai-chat.ffpstock.app}
+        # Server-side URLs use internal Docker network addresses
+        SUPABASE_URL: ${SUPABASE_URL:-http://supabase_kong_supabase-ffp:8000}
+    # Production mode - uses built Next.js application
     command: ["node_modules/.bin/next", "start", "-p", "3075"]
     ports:
       - "3075:3075"
+    # Production: No volume mounts needed (app is built into image)
+    # For development, uncomment volumes and change command to "dev"
+    # volumes:
+    #   - .:/app:rw
+    #   - /app/node_modules
+    #   - /app/.next
     environment:
       PORT: 3075
-      # Supabase Configuration
-      NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL:-http://host.docker.internal:54321}
+      # Browser-accessible URL (use HTTPS public URL for production)
+      NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL:-https://supabase.ffpstock.app}
       NEXT_PUBLIC_SUPABASE_ANON_KEY: ${NEXT_PUBLIC_SUPABASE_ANON_KEY}
-      SUPABASE_URL: ${SUPABASE_URL:-http://host.docker.internal:54321}
-      
-      # Backend API Configuration
-      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://host.docker.internal:8000}
-      
-      # Node environment
+      # Server-side URLs use internal Docker network addresses  
+      SUPABASE_URL: ${SUPABASE_URL:-http://supabase_kong_supabase-ffp:8000}
+      SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY:-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJvbGUiOiJzZXJ2aWNlX3JvbGUiLCJpYXQiOjE3NjMwOTcyOTQsImV4cCI6MjA3ODQ1NzI5NH0.pGFRjcWKrxr20BeyRNZw4Si2NELVXFE43SVkTc2w9sY}
+      SUPABASE_KONG_URL: http://supabase_kong_supabase-ffp:8000
+      POSTGREST_URL: ${POSTGREST_URL:-http://supabase_kong_supabase-ffp:8000}
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-https://api.ffpstock.app}
+      AI_CHAT_API_URL: ${AI_CHAT_API_URL:-http://ai-agent-chat:8001}
+      NEXT_PUBLIC_AI_CHAT_URL: ${NEXT_PUBLIC_AI_CHAT_URL:-https://ai-chat.ffpstock.app}
       NODE_ENV: production
       NEXT_TELEMETRY_DISABLED: 1
     
@@ -31,7 +42,8 @@ services:
     
     restart: unless-stopped
     networks:
-      - ffp-network
+      - supabase_network_supabase-ffp
+      - stock_network
     
     healthcheck:
       test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3075"]
@@ -40,14 +52,14 @@ services:
       retries: 3
       start_period: 10s
     
-    # Logging configuration
     logging:
       driver: "json-file"
       options:
         max-size: "10m"
-        max-file: "3"
+        max-file: "1"
 
 networks:
-  ffp-network:
-    driver: bridge
-
+  supabase_network_supabase-ffp:
+    external: true
+  stock_network:
+    external: true

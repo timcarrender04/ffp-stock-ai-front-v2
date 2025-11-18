@@ -1,6 +1,6 @@
 @import "tailwindcss";
 
-@config "../tailwind.config.js";
+@config "../tailwind.config.mjs";
 
 :root {
   color-scheme: dark;
@@ -10,9 +10,19 @@
   --finance-green: #00c16a;
 }
 
+html {
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+
 body {
   background: var(--finance-black);
   color: #f5f9f7;
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
+  position: relative;
 }
 
 .text-finance-green {
@@ -94,4 +104,35 @@ body {
 
 .text-finance-green-80 {
   color: color-mix(in srgb, var(--finance-green) 80%, white 20%);
+}
+
+/* Mobile optimizations */
+@media (max-width: 640px) {
+  /* Improve touch scrolling */
+  * {
+    -webkit-tap-highlight-color: rgba(0, 193, 106, 0.2);
+  }
+  
+  /* Better touch targets */
+  button, a {
+    touch-action: manipulation;
+  }
+  
+  /* Smooth scrolling */
+  html {
+    -webkit-overflow-scrolling: touch;
+    overflow-x: hidden;
+  }
+  
+  /* Constrain all containers */
+  body, main, section {
+    max-width: 100vw;
+    overflow-x: hidden;
+  }
+  
+  /* Prevent horizontal overflow on cards and containers */
+  .rounded-3xl, .rounded-2xl {
+    max-width: 100%;
+    box-sizing: border-box;
+  }
 }

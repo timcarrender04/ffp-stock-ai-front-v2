@@ -37,23 +37,23 @@ export function MarketConditionsCard({ condition, breadth, sentiment }: Props) {
   const trend = condition?.market_trend ?? "Unknown";
 
   return (
-    <div className="grid gap-6 lg:grid-cols-3">
-      <Card className="border border-finance-green-25 bg-gradient-to-br from-finance-surface-70/90 via-finance-surface-80 to-finance-surface-60 p-6 shadow-2xl">
+    <div className="grid gap-4 sm:gap-6 lg:grid-cols-3">
+      <Card className="border border-finance-green-25 bg-gradient-to-br from-finance-surface-70/90 via-finance-surface-80 to-finance-surface-60 p-4 sm:p-6 shadow-2xl">
         <div className="flex items-center justify-between">
           <div>
             <p className="text-xs uppercase tracking-[0.35em] text-finance-green-70">
               Market Pulse
             </p>
-            <h3 className="text-lg font-semibold text-white">
+            <h3 className="text-base sm:text-lg font-semibold text-white">
               Conditions Overview
             </h3>
           </div>
           <Icon
-            className="text-3xl text-finance-green-60"
+            className="text-2xl sm:text-3xl text-finance-green-60"
             icon="solar:global-linear"
           />
         </div>
-        <div className="mt-6 grid gap-4">
+        <div className="mt-4 sm:mt-6 grid gap-3 sm:gap-4">
           <div className="rounded-2xl border border-finance-green-30/60 bg-black/20 p-4">
             <p className="text-xs uppercase tracking-[0.3em] text-finance-green-60">
               Trend Profile
@@ -76,7 +76,7 @@ export function MarketConditionsCard({ condition, breadth, sentiment }: Props) {
                   Strength {formatPercentSmart(condition?.trend_strength, 0)}
                 </span>
               </div>
-              <span className="text-xs text-zinc-400">
+              <span suppressHydrationWarning className="text-xs text-zinc-400">
                 {formatDateTime(condition?.updated_at ?? condition?.created_at)}
               </span>
             </div>
@@ -132,71 +132,75 @@ export function MarketConditionsCard({ condition, breadth, sentiment }: Props) {
       </Card>
 
       <Card className="border border-finance-green-25 bg-finance-surface-70/80 shadow-2xl backdrop-blur-xl">
-        <CardHeader className="flex items-center justify-between">
+        <CardHeader className="flex items-center justify-between p-3 sm:p-4">
           <div>
             <p className="text-xs uppercase tracking-[0.35em] text-finance-green-70">
               Market Breadth
             </p>
-            <h3 className="text-lg font-semibold text-white">
+            <h3 className="text-base sm:text-lg font-semibold text-white">
               Advance / Decline
             </h3>
           </div>
           <Icon
-            className="text-2xl text-finance-green"
+            className="text-xl sm:text-2xl text-finance-green"
             icon="solar:graph-up-line-duotone"
           />
         </CardHeader>
-        <CardBody>
-          <Table
-            removeWrapper
-            aria-label="Market breadth table"
-            className="min-w-[360px]"
-          >
-            <TableHeader>
-              <TableColumn>Date</TableColumn>
-              <TableColumn>Adv</TableColumn>
-              <TableColumn>Dec</TableColumn>
-              <TableColumn>Up Vol</TableColumn>
-              <TableColumn>Down Vol</TableColumn>
-            </TableHeader>
-            <TableBody
-              emptyContent="No breadth data"
-              items={breadth.slice(0, 5)}
+        <CardBody className="p-3 sm:p-4">
+          <div className="overflow-x-auto">
+            <Table
+              removeWrapper
+              aria-label="Market breadth table"
+              className="min-w-[360px]"
             >
-              {(row) => (
-                <TableRow key={row.date}>
-                  <TableCell>{row.date}</TableCell>
-                  <TableCell>
-                    {formatCompactNumber(row.advancing_issues)}
-                  </TableCell>
-                  <TableCell>
-                    {formatCompactNumber(row.declining_issues)}
-                  </TableCell>
-                  <TableCell>{formatCompactNumber(row.up_volume)}</TableCell>
-                  <TableCell>{formatCompactNumber(row.down_volume)}</TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
+              <TableHeader>
+                <TableColumn>Date</TableColumn>
+                <TableColumn>Adv</TableColumn>
+                <TableColumn>Dec</TableColumn>
+                <TableColumn>Up Vol</TableColumn>
+                <TableColumn>Down Vol</TableColumn>
+              </TableHeader>
+              <TableBody
+                emptyContent="No breadth data"
+                items={breadth.slice(0, 5)}
+              >
+                {(row) => (
+                  <TableRow key={row.date}>
+                    <TableCell>{row.date}</TableCell>
+                    <TableCell>
+                      {formatCompactNumber(row.advancing_issues)}
+                    </TableCell>
+                    <TableCell>
+                      {formatCompactNumber(row.declining_issues)}
+                    </TableCell>
+                    <TableCell>{formatCompactNumber(row.up_volume)}</TableCell>
+                    <TableCell>
+                      {formatCompactNumber(row.down_volume)}
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </div>
         </CardBody>
       </Card>
 
       <Card className="border border-finance-green-25 bg-finance-surface-70/80 shadow-2xl backdrop-blur-xl">
-        <CardHeader className="flex items-center justify-between">
+        <CardHeader className="flex items-center justify-between p-3 sm:p-4">
           <div>
             <p className="text-xs uppercase tracking-[0.35em] text-finance-green-70">
               Sentiment Deck
             </p>
-            <h3 className="text-lg font-semibold text-white">
+            <h3 className="text-base sm:text-lg font-semibold text-white">
               Crowd Temperature
             </h3>
           </div>
           <Icon
-            className="text-2xl text-finance-green"
+            className="text-xl sm:text-2xl text-finance-green"
             icon="solar:emoji-funny-square-line-duotone"
           />
         </CardHeader>
-        <CardBody className="flex flex-col gap-4">
+        <CardBody className="flex flex-col gap-3 sm:gap-4 p-3 sm:p-4">
           {latestSentiment ? (
             <>
               <div className="rounded-2xl border border-finance-green-30/60 bg-black/20 p-4">
@@ -217,32 +221,34 @@ export function MarketConditionsCard({ condition, breadth, sentiment }: Props) {
                 <p className="text-xs uppercase tracking-[0.3em] text-finance-green-60">
                   Recent Trend
                 </p>
-                <Table
-                  removeWrapper
-                  aria-label="Market sentiment trend"
-                  className="mt-2 min-w-[260px]"
-                >
-                  <TableHeader>
-                    <TableColumn>Date</TableColumn>
-                    <TableColumn>Score</TableColumn>
-                    <TableColumn>Crowd</TableColumn>
-                  </TableHeader>
-                  <TableBody items={sentiment.slice(0, 5)}>
-                    {(row) => (
-                      <TableRow key={row.date}>
-                        <TableCell>{row.date}</TableCell>
-                        <TableCell>
-                          {formatNumber(row.sentiment_score, {
-                            maximumFractionDigits: 2,
-                          })}
-                        </TableCell>
-                        <TableCell>
-                          {formatPercentSmart(row.crowd_sentiment, 0)}
-                        </TableCell>
-                      </TableRow>
-                    )}
-                  </TableBody>
-                </Table>
+                <div className="mt-2 overflow-x-auto">
+                  <Table
+                    removeWrapper
+                    aria-label="Market sentiment trend"
+                    className="min-w-[260px]"
+                  >
+                    <TableHeader>
+                      <TableColumn>Date</TableColumn>
+                      <TableColumn>Score</TableColumn>
+                      <TableColumn>Crowd</TableColumn>
+                    </TableHeader>
+                    <TableBody items={sentiment.slice(0, 5)}>
+                      {(row) => (
+                        <TableRow key={row.date}>
+                          <TableCell>{row.date}</TableCell>
+                          <TableCell>
+                            {formatNumber(row.sentiment_score, {
+                              maximumFractionDigits: 2,
+                            })}
+                          </TableCell>
+                          <TableCell>
+                            {formatPercentSmart(row.crowd_sentiment, 0)}
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </TableBody>
+                  </Table>
+                </div>
               </div>
             </>
           ) : (

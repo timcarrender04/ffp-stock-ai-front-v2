@@ -174,7 +174,7 @@ export function TierDashboard() {
       }
 
       try {
-        const res = await fetch(`/api/moonshot/top-25?limit=${tier}`);
+        const res = await fetch(`/api/top/${tier}?limit=${tier}`);
 
         if (!res.ok) {
           const body = await res.json().catch(() => ({}));
@@ -182,7 +182,8 @@ export function TierDashboard() {
           throw new Error(body?.error || `Request failed with ${res.status}`);
         }
 
-        const payload = (await res.json()) as MoonshotTierEntry[];
+        const json = (await res.json()) as any;
+        const payload = Array.isArray(json) ? json : json?.data || [];
         const next = { ...dataRef.current, [tier]: payload };
 
         dataRef.current = next;
@@ -302,7 +303,7 @@ export function TierDashboard() {
             </TableHeader>
             <TableBody items={rows}>
               {(row) => (
-                <TableRow key={row.id}>
+                <TableRow key={`${row.symbol}-${row.rank}`}>
                   {(columnKey) => {
                     switch (columnKey) {
                       case "rank":

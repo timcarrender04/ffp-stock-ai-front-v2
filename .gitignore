@@ -26,6 +26,11 @@ yarn-error.log*
 
 # local env files
 .env*.local
+.env
+.env.production.local
+.env.development.local
+.env.test.local
+ffp.env.*.text
 
 # vercel
 .vercel
@@ -34,7 +39,30 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+# lock files (keep package-lock.json but ignore others)
 pnpm-lock.yaml
 yarn.lock
-package-lock.json
 bun.lockb
+
+# test results
+/api-test-results/
+
+# temporary documentation/debug files
+*_FIX*.md
+*_DEBUG*.md
+*_TESTING*.md
+*_COMPLETE*.md
+*_SUMMARY*.md
+*_ISSUES*.md
+*_WORKING*.md
+*_CONNECTING*.md
+*_REQUIRED*.md
+QUICK_*.md
+*_QUICK_*.md
+
+# deployment scripts (keep only if they're needed)
+# deploy-fix.sh (keep for now but consider moving to scripts/)
+# test-api-endpoints.sh (keep for now but consider moving to scripts/)
+
+# iconify config (if auto-generated)
+lib/iconify-config.ts

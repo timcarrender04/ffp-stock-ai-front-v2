@@ -1,3 +1,4 @@
+import { type SupabaseClient, createClient } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
 
 const ALLOWED_TIERS = new Map<string, string>([
@@ -41,67 +42,52 @@ export async function GET(
     );
   }
 
-  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  const kongUrl =
-    process.env.SUPABASE_KONG_URL ||
-    process.env.SUPABASE_URL ||
-    process.env.NEXT_PUBLIC_SUPABASE_URL;
+  // Server-side: prefer internal Docker network URL, fallback to public URL
+  const supabaseUrl =
+    process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-  if (!serviceRoleKey || !kongUrl) {
+  if (!supabaseUrl || !supabaseKey) {
     return NextResponse.json(
       { error: "Supabase configuration missing" },
       { status: 500 },
     );
   }
 
+  const supabase = createClient(supabaseUrl, supabaseKey, {
+    auth: { persistSession: false },
+  });
+
   const { searchParams } = new URL(request.url);
-  const limit = searchParams.get("limit") ?? "25";
+  const limit = Number.parseInt(searchParams.get("limit") ?? "25", 10);
   const scanDate = searchParams.get("scan_date");
   const columns = searchParams.get("select") || DEFAULT_COLUMNS.join(",");
 
-  const url = new URL(`${kongUrl.replace(/\/$/, "")}/rest/v1/${table}`);
-
-  url.searchParams.set("select", columns);
-  url.searchParams.set("order", "rank.asc");
-  url.searchParams.set("limit", limit);
-
-  // Headers for Supabase REST API
-  const headers: Record<string, string> = {
-    apikey: serviceRoleKey,
-    Authorization: `Bearer ${serviceRoleKey}`,
-    "Content-Type": "application/json",
-    Prefer: "return=representation",
-    "Accept-Profile": SCHEMA_PROFILE,
-    "Content-Profile": SCHEMA_PROFILE,
-  };
-
-  if (scanDate) {
-    url.searchParams.set("scan_date", `eq.${scanDate}`);
-  }
-
   try {
-    const res = await fetch(url.toString(), {
-      headers,
-      next: { revalidate: 30 },
-    });
+    const resolvedScanDate =
+      scanDate ?? (await getLatestScanDateForTable(supabase, table));
 
-    const text = await res.text();
-    const contentType = res.headers.get("content-type") || "application/json";
+    let query = supabase
+      .schema(SCHEMA_PROFILE)
+      .from(table)
+      .select(columns)
+      .order("rank", { ascending: true })
+      .limit(Number.isNaN(limit) ? 25 : limit);
 
-    if (!res.ok) {
+    if (resolvedScanDate) {
+      query = query.eq("scan_date", resolvedScanDate);
+    }
+
+    const { data, error } = await query;
+
+    if (error) {
       return NextResponse.json(
-        {
-          error: `Upstream error ${res.status}`,
-          body: safeParse(text),
-        },
-        { status: res.status },
+        { error: "Failed to fetch tier data", message: error.message },
+        { status: 502 },
       );
     }
 
-    return new NextResponse(text, {
-      status: res.status,
-      headers: { "content-type": contentType },
-    });
+    return NextResponse.json(data ?? [], { status: 200 });
   } catch (error) {
     const message =
       error instanceof Error ? error.message : "Unknown upstream error";
@@ -113,10 +99,22 @@ export async function GET(
   }
 }
 
-function safeParse(payload: string) {
-  try {
-    return JSON.parse(payload);
-  } catch {
-    return payload;
+async function getLatestScanDateForTable(
+  supabase: SupabaseClient,
+  table: string,
+) {
+  const { data, error } = await supabase
+    .schema(SCHEMA_PROFILE)
+    .from(table)
+    .select("scan_date")
+    .not("scan_date", "is", null)
+    .order("scan_date", { ascending: false, nullsFirst: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (error) {
+    return null;
   }
+
+  return data?.scan_date ?? null;
 }

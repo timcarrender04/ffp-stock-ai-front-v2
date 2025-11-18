@@ -1,7 +1,8 @@
 "use client";
 
-import React, { Suspense } from "react";
-import { useSearchParams } from "next/navigation";
+import React, { Suspense, useEffect } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
+import Link from "next/link";
 import { Form } from "@heroui/form";
 import { Input } from "@heroui/input";
 import { Button } from "@heroui/button";
@@ -10,16 +11,65 @@ import { Icon } from "@iconify/react";
 
 import { loginAction } from "./actions";
 
+import { useAuth } from "@/lib/supabase/auth-context";
+
+function AlertDisclaimer() {
+  return (
+    <div className="relative w-full max-w-xl">
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 animate-pulse rounded-2xl bg-gradient-to-r from-red-600/40 via-transparent to-red-600/40 blur-3xl"
+      />
+      <div className="relative flex gap-3 rounded-2xl border border-red-500/70 bg-gradient-to-r from-red-900/90 via-red-800/80 to-red-900/90 px-5 py-4 text-sm leading-relaxed text-red-50 shadow-[0_0_35px_rgba(248,113,113,0.55)]">
+        <span aria-label="Alert" className="text-2xl" role="img">
+          🚨
+        </span>
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-red-200">
+            Alert: Educational Use Only
+          </p>
+          <p className="mt-2 text-sm text-red-50/90">
+            FFP Stock AI is a research tool to support your own decision making.
+            Nothing shown here is financial advice, we do not manage your risk,
+            and you accept full responsibility for every trade and any losses.
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function LoginForm() {
   const searchParams = useSearchParams();
+  const router = useRouter();
+  const { session, isLoading: authLoading } = useAuth();
   const [isVisible, setIsVisible] = React.useState(false);
   const [isLoading, setIsLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
+
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (!authLoading && session) {
+      const redirectTo = searchParams.get("redirectTo") || "/";
+
+      router.replace(redirectTo);
+    }
+  }, [session, authLoading, router, searchParams]);
 
   const toggleVisibility = () => setIsVisible((prev) => !prev);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+
+    // Prevent form submission if already authenticated
+    if (session) {
+      const redirectTo = searchParams.get("redirectTo") || "/";
+
+      router.replace(redirectTo);
+
+      return;
+    }
+
     setError(null);
     setIsLoading(true);
 
@@ -35,10 +85,16 @@ function LoginForm() {
         setError(result.error);
         setIsLoading(false);
       }
-      // If no result (redirect was called), the page will redirect automatically
-    } catch {
+      // If no result/undefined (redirect was called), the server action will redirect
+      // and the page will automatically redirect. Don't do anything here.
+    } catch (err) {
       // Handle any unexpected errors
-      setError("An unexpected error occurred. Please try again.");
+      const errorMessage =
+        err instanceof Error
+          ? err.message
+          : "An unexpected error occurred. Please try again.";
+
+      setError(errorMessage);
       setIsLoading(false);
     }
   };
@@ -136,6 +192,15 @@ function LoginForm() {
         >
           Log In
         </Button>
+        <p className="text-center text-sm text-zinc-400">
+          Don&apos;t have an account?{" "}
+          <Link
+            className="text-finance-green hover:text-finance-green-80 underline"
+            href="/signup"
+          >
+            Sign up
+          </Link>
+        </p>
       </Form>
     </div>
   );
@@ -143,10 +208,13 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <div className="flex min-h-screen w-full items-center justify-center bg-gradient-to-br from-finance-black via-black to-finance-slate">
-      <Suspense fallback={<div className="text-white">Loading...</div>}>
-        <LoginForm />
-      </Suspense>
+    <div className="flex min-h-screen w-full items-center justify-center bg-gradient-to-br from-finance-black via-black to-finance-slate px-4">
+      <div className="flex w-full max-w-4xl flex-col items-center gap-8">
+        <AlertDisclaimer />
+        <Suspense fallback={<div className="text-white">Loading...</div>}>
+          <LoginForm />
+        </Suspense>
+      </div>
     </div>
   );
 }

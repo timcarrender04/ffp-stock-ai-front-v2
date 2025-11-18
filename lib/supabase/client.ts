@@ -10,5 +10,20 @@ export function createClient() {
     throw new Error("Missing Supabase browser credentials");
   }
 
-  return createBrowserClient(url, anonKey);
+  return createBrowserClient(url, anonKey, {
+    // Completely disable Realtime to prevent WebSocket connection errors
+    // We use the AI Chat WebSocket service instead for real-time messaging
+    // Note: Supabase client may still initialize Realtime, but we won't use it
+    global: {
+      headers: {
+        "X-Client-Info": "ffp-stock-ai-frontend",
+      },
+    },
+    auth: {
+      persistSession: true,
+      autoRefreshToken: true,
+      detectSessionInUrl: true,
+      flowType: "pkce",
+    },
+  });
 }

@@ -7,6 +7,7 @@ export type MoonshotTopEntry = {
   rank: number;
   symbol: string;
   scan_date: string | null;
+  created_at: string | null;
   moonshot_score: number | null;
   price: number | null;
   price_change_pct: number | null;
@@ -65,6 +66,7 @@ const TOP_FIELDS = [
   "rank",
   "symbol",
   "scan_date",
+  "created_at",
   "moonshot_score",
   "price",
   "price_change_pct",
@@ -120,12 +122,23 @@ const CONSENSUS_FIELDS = [
 
 export async function fetchMoonshotTop(limit = 6): Promise<MoonshotTopEntry[]> {
   const supabase = await getSupabase();
-  const { data, error } = await supabase
+  const latestScanDate = await getLatestScanDate(supabase);
+
+  let query = supabase
     .schema("moonshot")
     .from("top_25")
     .select(TOP_FIELDS.join(","))
     .order("rank", { ascending: true })
     .limit(limit);
+
+  if (latestScanDate) {
+    query = query.eq("scan_date", latestScanDate);
+  } else {
+    // When no scan date exists yet, fall back to most recent rows
+    query = query.order("scan_date", { ascending: false, nullsFirst: false });
+  }
+
+  const { data, error } = await query;
 
   if (error) {
     // eslint-disable-next-line no-console
@@ -197,6 +210,75 @@ export async function fetchMoonshotConsensus(
   return result as unknown as MoonshotConsensus[];
 }
 
+export async function fetchMoonshotTop50Count(): Promise<number> {
+  const supabase = await getSupabase();
+  const today = new Date().toISOString().slice(0, 10);
+  const { count, error } = await supabase
+    .schema("moonshot")
+    .from("top_50")
+    .select("*", { count: "exact", head: true })
+    .eq("scan_date", today);
+
+  if (error) {
+    // eslint-disable-next-line no-console
+    console.error(
+      "[moonshot-service] fetchMoonshotTop50Count ERROR:",
+      error.message || error,
+    );
+
+    return 0;
+  }
+
+  return count ?? 0;
+}
+
+export async function fetchMoonshotTop100Count(): Promise<number> {
+  const supabase = await getSupabase();
+  const today = new Date().toISOString().slice(0, 10);
+  const { count, error } = await supabase
+    .schema("moonshot")
+    .from("top_100")
+    .select("*", { count: "exact", head: true })
+    .eq("scan_date", today);
+
+  if (error) {
+    // eslint-disable-next-line no-console
+    console.error(
+      "[moonshot-service] fetchMoonshotTop100Count ERROR:",
+      error.message || error,
+    );
+
+    return 0;
+  }
+
+  return count ?? 0;
+}
+
 async function getSupabase(): Promise<SupabaseClient> {
   return createServerSupabaseClient();
+}
+
+async function getLatestScanDate(
+  supabase: SupabaseClient,
+): Promise<string | null> {
+  const { data, error } = await supabase
+    .schema("moonshot")
+    .from("top_25")
+    .select("scan_date")
+    .not("scan_date", "is", null)
+    .order("scan_date", { ascending: false, nullsFirst: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (error) {
+    // eslint-disable-next-line no-console
+    console.error(
+      "[moonshot-service] getLatestScanDate ERROR:",
+      error.message || error,
+    );
+
+    return null;
+  }
+
+  return data?.scan_date ?? null;
 }

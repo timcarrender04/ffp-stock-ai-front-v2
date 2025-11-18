@@ -22,20 +22,13 @@ npm install
 npm run dev
 ```
 
-The app expects Supabase credentials in `.env.local`. Copy the example file and adjust the values:
+### Environment loading
 
-```bash
-cp env.example .env.local
-```
+- `.env` is now the **canonical env file** for both Docker and the local dev server. Keep the production-mirroring values (Supabase/API URLs, keys, etc.) inside this file so everything matches.
+- If `.env` is missing, `npm run dev` falls back to `ffp.env.text`, which still contains the same defaults checked into the repo.
+- Update whichever file you’re using and restart `npm run dev` to pick up changes.
 
-| Variable | Purpose |
-| --- | --- |
-| `NEXT_PUBLIC_SUPABASE_URL` | PostgREST endpoint exposed to the browser (e.g. `http://127.0.0.1:54321`) |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Public anon key for client-side auth |
-| `SUPABASE_SERVICE_ROLE_KEY` | Service role key used by server routes for privileged reads |
-| `SUPABASE_KONG_URL` | Optional Kong gateway URL (falls back to `SUPABASE_URL`/`NEXT_PUBLIC_SUPABASE_URL`) |
-
-Restart the dev server after changing environment variables.
+> `.env.local` from `env.example` is optional; it’s fine to keep using it for ad-hoc overrides, but the standard workflow expects `.env`.
 
 ## Supabase workflow
 
@@ -55,10 +48,20 @@ You can log in via `/login` using those credentials. Run the reset command again
 
 ## Scripts
 
+### NPM Scripts
+
 - `npm run dev` – start the Next.js dev server with Turbopack
 - `npm run build` – production build
 - `npm start` – serve the built app
 - `npm run lint` – run ESLint with `--fix`
+
+### Utility Scripts
+
+Additional utility scripts are available in the [`scripts/`](./scripts/) directory:
+- `DIAGNOSTIC.sh` – Run diagnostic checks
+- `QUICK_START.sh` – Quick start script
+- `PUSH_TO_GIT.sh` – Git push with checks
+- See [`scripts/README.md`](./scripts/README.md) for details
 
 ## Deployment
 
@@ -84,10 +87,17 @@ docker-compose down
 
 ### Documentation
 
-- **QUICK_DEPLOY.md** – 5-minute deployment guide
-- **DOCKER_DEPLOYMENT.md** – Comprehensive Docker guide
-- **DEPLOYMENT_CHECKLIST.md** – Full deployment checklist
-- **DEPLOYMENT_QUICK_REF.txt** – Quick reference card
+All project documentation has been organized in the [`docs/`](./docs/) directory:
+
+**Quick Links:**
+- **[Getting Started Guide](./docs/START_HERE.md)** – Main entry point for new developers
+- **[Quick Start](./docs/QUICK_START.md)** – Get up and running quickly
+- **[Authentication Guide](./docs/START_HERE_AUTHENTICATION.md)** – Auth setup and usage
+- **[AI Agent Integration](./docs/AI_AGENT_CHAT_INTEGRATION.md)** – AI agents and chat features
+- **[Deployment Guide](./docs/QUICK_DEPLOY.md)** – Deploy the application
+- **[Troubleshooting](./docs/TROUBLESHOOTING.md)** – Common issues and solutions
+
+See the complete **[Documentation Index](./docs/README.md)** for all available guides organized by category.
 
 ## License
 

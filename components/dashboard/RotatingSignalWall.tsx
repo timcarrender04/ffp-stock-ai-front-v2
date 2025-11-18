@@ -69,21 +69,21 @@ const PANES: PaneConfig[] = [
     key: "top25",
     label: "Top 25",
     description: "Highest conviction Moonshot ideas (auto-refresh)",
-    endpoint: "/api/moonshot/top-25?limit=25",
+    endpoint: "/api/top/25?limit=25",
     kind: "tier",
   },
   {
     key: "top50",
     label: "Top 50",
     description: "Broader momentum cohort for monitoring",
-    endpoint: "/api/moonshot/top-25?limit=50",
+    endpoint: "/api/top/50?limit=50",
     kind: "tier",
   },
   {
     key: "top100",
     label: "Top 100",
     description: "Entire universe tracked by Moonshot scanner",
-    endpoint: "/api/moonshot/top-25?limit=100",
+    endpoint: "/api/top/100?limit=100",
     kind: "tier",
   },
   {
@@ -265,7 +265,8 @@ export function RotatingSignalWall() {
           );
         }
 
-        const payload = await response.json();
+        const json = await response.json();
+        const payload = Array.isArray(json) ? json : json?.data || [];
 
         setData((prev) => ({
           ...prev,
@@ -337,13 +338,13 @@ export function RotatingSignalWall() {
     <section className="flex flex-col gap-6">
       <header className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div className="flex flex-col gap-2">
-          <span className="text-sm uppercase tracking-[0.3em] text-finance-green-70">
+          <span className="text-xs sm:text-sm uppercase tracking-[0.3em] text-finance-green-70">
             24/7 rotation
           </span>
-          <h1 className="text-3xl font-semibold text-white md:text-4xl">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-white">
             Live Signal Wall
           </h1>
-          <p className="max-w-2xl text-sm text-zinc-300">
+          <p className="max-w-2xl text-xs sm:text-sm text-zinc-300">
             Auto-cycles through Moonshot tiers and the unified trading
             recommendations feed. Refreshes every 10 seconds to keep the trading
             desk synced around the clock.
@@ -400,7 +401,7 @@ export function RotatingSignalWall() {
           />
         </div>
 
-        <div className="rounded-3xl border border-finance-green-30 bg-finance-surface-80 p-6 shadow-2xl backdrop-blur-xl">
+        <div className="rounded-3xl border border-finance-green-30 bg-finance-surface-80 p-4 sm:p-6 shadow-2xl backdrop-blur-xl overflow-x-auto">
           {isLoading && rows.length === 0 ? (
             <div className="flex h-48 flex-col items-center justify-center gap-3 text-zinc-300">
               <Spinner color="success" />
@@ -476,105 +477,115 @@ function TierTable({ rows }: TierTableProps) {
   ];
 
   return (
-    <Table removeWrapper aria-label="Tier data" className="text-white">
-      <TableHeader columns={columns}>
-        {(column) => (
-          <TableColumn
-            key={column.key}
-            className="text-xs uppercase tracking-wide text-zinc-400"
-          >
-            {column.label}
-          </TableColumn>
-        )}
-      </TableHeader>
-      <TableBody items={rows}>
-        {(row) => (
-          <TableRow key={`${row.id}-${row.rank}`}>
-            {(columnKey) => {
-              switch (columnKey) {
-                case "rank":
-                  return (
-                    <TableCell className="font-semibold text-finance-green">
-                      {row.rank}
-                    </TableCell>
-                  );
-                case "symbol":
-                  return (
-                    <TableCell className="font-semibold">
-                      <div className="flex items-center gap-2">
-                        <span>{row.symbol}</span>
-                        {row.trending_status ? (
-                          <Chip color="success" size="sm" variant="flat">
-                            {row.trending_status}
-                          </Chip>
-                        ) : null}
-                      </div>
-                    </TableCell>
-                  );
-                case "moonshot_score":
-                  return (
-                    <TableCell>
-                      {Number(row.moonshot_score ?? 0).toFixed(2)}
-                    </TableCell>
-                  );
-                case "price":
-                  return (
-                    <TableCell>${Number(row.price ?? 0).toFixed(2)}</TableCell>
-                  );
-                case "price_change_pct":
-                  return (
-                    <TableCell
-                      className={
-                        Number(row.price_change_pct ?? 0) >= 0
-                          ? "text-green-400"
-                          : "text-red-400"
-                      }
-                    >
-                      {formatPercent(row.price_change_pct)}
-                    </TableCell>
-                  );
-                case "volume":
-                  return <TableCell>{formatNumber(row.volume)}</TableCell>;
-                case "volume_ratio":
-                  return (
-                    <TableCell>
-                      {Number(row.volume_ratio ?? 0).toFixed(2)}x
-                    </TableCell>
-                  );
-                case "ai_recommendation":
-                  return (
-                    <TableCell>
-                      <Chip color="success" size="sm" variant="flat">
-                        {row.ai_recommendation ?? "—"}
-                      </Chip>
-                    </TableCell>
-                  );
-                case "risk_level":
-                  return (
-                    <TableCell>
-                      <Chip size="sm" variant="bordered">
-                        {row.risk_level ?? "—"}
-                      </Chip>
-                    </TableCell>
-                  );
-                case "confidence_score":
-                  return (
-                    <TableCell>
-                      {confidenceChip(row.confidence_score)}
-                    </TableCell>
-                  );
-                default:
-                  return (
-                    <TableCell>
-                      {String(row[columnKey as keyof MoonshotTierEntry] ?? "—")}
-                    </TableCell>
-                  );
-              }
-            }}
-          </TableRow>
-        )}
-      </TableBody>
-    </Table>
+    <div className="overflow-x-auto">
+      <Table
+        removeWrapper
+        aria-label="Tier data"
+        className="text-white min-w-[800px]"
+      >
+        <TableHeader columns={columns}>
+          {(column) => (
+            <TableColumn
+              key={column.key}
+              className="text-xs uppercase tracking-wide text-zinc-400"
+            >
+              {column.label}
+            </TableColumn>
+          )}
+        </TableHeader>
+        <TableBody items={rows}>
+          {(row) => (
+            <TableRow key={`${row.symbol}-${row.rank}`}>
+              {(columnKey) => {
+                switch (columnKey) {
+                  case "rank":
+                    return (
+                      <TableCell className="font-semibold text-finance-green">
+                        {row.rank}
+                      </TableCell>
+                    );
+                  case "symbol":
+                    return (
+                      <TableCell className="font-semibold">
+                        <div className="flex items-center gap-2">
+                          <span>{row.symbol}</span>
+                          {row.trending_status ? (
+                            <Chip color="success" size="sm" variant="flat">
+                              {row.trending_status}
+                            </Chip>
+                          ) : null}
+                        </div>
+                      </TableCell>
+                    );
+                  case "moonshot_score":
+                    return (
+                      <TableCell>
+                        {Number(row.moonshot_score ?? 0).toFixed(2)}
+                      </TableCell>
+                    );
+                  case "price":
+                    return (
+                      <TableCell>
+                        ${Number(row.price ?? 0).toFixed(2)}
+                      </TableCell>
+                    );
+                  case "price_change_pct":
+                    return (
+                      <TableCell
+                        className={
+                          Number(row.price_change_pct ?? 0) >= 0
+                            ? "text-green-400"
+                            : "text-red-400"
+                        }
+                      >
+                        {formatPercent(row.price_change_pct)}
+                      </TableCell>
+                    );
+                  case "volume":
+                    return <TableCell>{formatNumber(row.volume)}</TableCell>;
+                  case "volume_ratio":
+                    return (
+                      <TableCell>
+                        {Number(row.volume_ratio ?? 0).toFixed(2)}x
+                      </TableCell>
+                    );
+                  case "ai_recommendation":
+                    return (
+                      <TableCell>
+                        <Chip color="success" size="sm" variant="flat">
+                          {row.ai_recommendation ?? "—"}
+                        </Chip>
+                      </TableCell>
+                    );
+                  case "risk_level":
+                    return (
+                      <TableCell>
+                        <Chip size="sm" variant="bordered">
+                          {row.risk_level ?? "—"}
+                        </Chip>
+                      </TableCell>
+                    );
+                  case "confidence_score":
+                    return (
+                      <TableCell>
+                        {confidenceChip(row.confidence_score)}
+                      </TableCell>
+                    );
+                  default:
+                    return (
+                      <TableCell>
+                        {String(
+                          row[columnKey as keyof MoonshotTierEntry] ?? "—",
+                        )}
+                      </TableCell>
+                    );
+                }
+              }}
+            </TableRow>
+          )}
+        </TableBody>
+      </Table>
+    </div>
   );
 }
 
@@ -600,155 +611,157 @@ function RecommendationTable({ rows }: RecommendationTableProps) {
   ];
 
   return (
-    <Table
-      removeWrapper
-      aria-label="Trading recommendations"
-      className="text-white"
-    >
-      <TableHeader columns={columns}>
-        {(column) => (
-          <TableColumn
-            key={column.key}
-            className="text-xs uppercase tracking-wide text-zinc-400"
-          >
-            {column.label}
-          </TableColumn>
-        )}
-      </TableHeader>
-      <TableBody items={rows}>
-        {(row) => (
-          <TableRow key={row.id}>
-            {(columnKey) => {
-              switch (columnKey) {
-                case "symbol":
-                  return (
-                    <TableCell className="font-semibold">
-                      <div className="flex flex-col gap-1">
-                        <span className="text-lg">{row.symbol}</span>
-                        <span className="text-[10px] uppercase tracking-[0.25em] text-finance-green-70">
-                          {row.recommendation_type ?? "—"}
-                        </span>
-                      </div>
-                    </TableCell>
-                  );
-                case "entry_tier":
-                  return (
-                    <TableCell>
-                      <Chip
-                        color={
-                          row.entry_tier === "STRONG_BUY"
-                            ? "success"
-                            : row.entry_tier === "BUY"
-                              ? "warning"
-                              : "default"
-                        }
-                        size="sm"
-                        variant="flat"
-                      >
-                        {row.entry_tier ?? "—"}
-                      </Chip>
-                    </TableCell>
-                  );
-                case "enhanced_composite_score":
-                  return (
-                    <TableCell>
-                      {typeof row.enhanced_composite_score === "number"
-                        ? row.enhanced_composite_score.toFixed(2)
-                        : "—"}
-                    </TableCell>
-                  );
-                case "recommended_action":
-                  return (
-                    <TableCell>
-                      <Chip color="success" size="sm" variant="flat">
-                        {row.recommended_action ?? "—"}
-                      </Chip>
-                    </TableCell>
-                  );
-                case "auto_trade":
-                  return (
-                    <TableCell>
-                      <Chip
-                        color={row.auto_trade ? "success" : "default"}
-                        size="sm"
-                        variant="flat"
-                      >
-                        {row.auto_trade ? "Auto" : "Manual"}
-                      </Chip>
-                    </TableCell>
-                  );
-                case "position_size":
-                  return (
-                    <TableCell>
-                      {typeof row.position_size === "number"
-                        ? `$${formatNumber(row.position_size)}`
-                        : "—"}
-                    </TableCell>
-                  );
-                case "entry_price":
-                  return (
-                    <TableCell>
-                      {typeof row.entry_price === "number"
-                        ? `$${row.entry_price.toFixed(2)}`
-                        : "—"}
-                    </TableCell>
-                  );
-                case "stop_loss":
-                  return (
-                    <TableCell>
-                      {typeof row.stop_loss === "number"
-                        ? `$${row.stop_loss.toFixed(2)}`
-                        : "—"}
-                    </TableCell>
-                  );
-                case "target_price":
-                  return (
-                    <TableCell>
-                      {typeof row.target_price === "number"
-                        ? `$${row.target_price.toFixed(2)}`
-                        : "—"}
-                    </TableCell>
-                  );
-                case "signals":
-                  return (
-                    <TableCell>
-                      <div className="flex flex-wrap items-center gap-2 text-[11px] text-zinc-300">
-                        {row.social_signal_strength ? (
-                          <Chip color="success" size="sm" variant="bordered">
-                            {row.social_signal_strength}
-                          </Chip>
+    <div className="overflow-x-auto">
+      <Table
+        removeWrapper
+        aria-label="Trading recommendations"
+        className="text-white min-w-[800px]"
+      >
+        <TableHeader columns={columns}>
+          {(column) => (
+            <TableColumn
+              key={column.key}
+              className="text-xs uppercase tracking-wide text-zinc-400"
+            >
+              {column.label}
+            </TableColumn>
+          )}
+        </TableHeader>
+        <TableBody items={rows}>
+          {(row) => (
+            <TableRow key={row.id}>
+              {(columnKey) => {
+                switch (columnKey) {
+                  case "symbol":
+                    return (
+                      <TableCell className="font-semibold">
+                        <div className="flex flex-col gap-1">
+                          <span className="text-lg">{row.symbol}</span>
+                          <span className="text-[10px] uppercase tracking-[0.25em] text-finance-green-70">
+                            {row.recommendation_type ?? "—"}
+                          </span>
+                        </div>
+                      </TableCell>
+                    );
+                  case "entry_tier":
+                    return (
+                      <TableCell>
+                        <Chip
+                          color={
+                            row.entry_tier === "STRONG_BUY"
+                              ? "success"
+                              : row.entry_tier === "BUY"
+                                ? "warning"
+                                : "default"
+                          }
+                          size="sm"
+                          variant="flat"
+                        >
+                          {row.entry_tier ?? "—"}
+                        </Chip>
+                      </TableCell>
+                    );
+                  case "enhanced_composite_score":
+                    return (
+                      <TableCell>
+                        {typeof row.enhanced_composite_score === "number"
+                          ? row.enhanced_composite_score.toFixed(2)
+                          : "—"}
+                      </TableCell>
+                    );
+                  case "recommended_action":
+                    return (
+                      <TableCell>
+                        <Chip color="success" size="sm" variant="flat">
+                          {row.recommended_action ?? "—"}
+                        </Chip>
+                      </TableCell>
+                    );
+                  case "auto_trade":
+                    return (
+                      <TableCell>
+                        <Chip
+                          color={row.auto_trade ? "success" : "default"}
+                          size="sm"
+                          variant="flat"
+                        >
+                          {row.auto_trade ? "Auto" : "Manual"}
+                        </Chip>
+                      </TableCell>
+                    );
+                  case "position_size":
+                    return (
+                      <TableCell>
+                        {typeof row.position_size === "number"
+                          ? `$${formatNumber(row.position_size)}`
+                          : "—"}
+                      </TableCell>
+                    );
+                  case "entry_price":
+                    return (
+                      <TableCell>
+                        {typeof row.entry_price === "number"
+                          ? `$${row.entry_price.toFixed(2)}`
+                          : "—"}
+                      </TableCell>
+                    );
+                  case "stop_loss":
+                    return (
+                      <TableCell>
+                        {typeof row.stop_loss === "number"
+                          ? `$${row.stop_loss.toFixed(2)}`
+                          : "—"}
+                      </TableCell>
+                    );
+                  case "target_price":
+                    return (
+                      <TableCell>
+                        {typeof row.target_price === "number"
+                          ? `$${row.target_price.toFixed(2)}`
+                          : "—"}
+                      </TableCell>
+                    );
+                  case "signals":
+                    return (
+                      <TableCell>
+                        <div className="flex flex-wrap items-center gap-2 text-[11px] text-zinc-300">
+                          {row.social_signal_strength ? (
+                            <Chip color="success" size="sm" variant="bordered">
+                              {row.social_signal_strength}
+                            </Chip>
+                          ) : null}
+                          {row.social_trend_direction ? (
+                            <Chip size="sm" variant="bordered">
+                              {row.social_trend_direction}
+                            </Chip>
+                          ) : null}
+                          {typeof row.social_composite_score === "number" ? (
+                            <Chip color="warning" size="sm" variant="flat">
+                              Social {row.social_composite_score.toFixed(1)}
+                            </Chip>
+                          ) : null}
+                        </div>
+                        {row.reason ? (
+                          <p className="mt-2 line-clamp-2 text-xs text-zinc-400">
+                            {row.reason}
+                          </p>
                         ) : null}
-                        {row.social_trend_direction ? (
-                          <Chip size="sm" variant="bordered">
-                            {row.social_trend_direction}
-                          </Chip>
-                        ) : null}
-                        {typeof row.social_composite_score === "number" ? (
-                          <Chip color="warning" size="sm" variant="flat">
-                            Social {row.social_composite_score.toFixed(1)}
-                          </Chip>
-                        ) : null}
-                      </div>
-                      {row.reason ? (
-                        <p className="mt-2 line-clamp-2 text-xs text-zinc-400">
-                          {row.reason}
-                        </p>
-                      ) : null}
-                    </TableCell>
-                  );
-                default:
-                  return (
-                    <TableCell>
-                      {String(
-                        row[columnKey as keyof TradingRecommendation] ?? "—",
-                      )}
-                    </TableCell>
-                  );
-              }
-            }}
-          </TableRow>
-        )}
-      </TableBody>
-    </Table>
+                      </TableCell>
+                    );
+                  default:
+                    return (
+                      <TableCell>
+                        {String(
+                          row[columnKey as keyof TradingRecommendation] ?? "—",
+                        )}
+                      </TableCell>
+                    );
+                }
+              }}
+            </TableRow>
+          )}
+        </TableBody>
+      </Table>
+    </div>
   );
 }

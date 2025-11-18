@@ -36,24 +36,24 @@ export function DailyScalpPanel({ performance, positions, orders }: Props) {
   const pnlTrend = performance.slice(0, 4);
 
   return (
-    <div className="grid gap-6 lg:grid-cols-5">
+    <div className="grid gap-4 sm:gap-6 lg:grid-cols-5">
       <Card className="border border-finance-green-25 bg-finance-surface-70/80 shadow-2xl backdrop-blur-xl lg:col-span-3">
-        <CardHeader className="flex items-center justify-between">
+        <CardHeader className="flex items-center justify-between p-3 sm:p-4">
           <div>
             <p className="text-xs uppercase tracking-[0.35em] text-finance-green-70">
               Daily Scalp
             </p>
-            <h3 className="text-lg font-semibold text-white">
+            <h3 className="text-base sm:text-lg font-semibold text-white">
               Performance Radar
             </h3>
           </div>
           <Icon
-            className="text-2xl text-finance-green"
+            className="text-xl sm:text-2xl text-finance-green"
             icon="solar:pulse-line-duotone"
           />
         </CardHeader>
-        <CardBody>
-          <div className="grid gap-4 lg:grid-cols-3">
+        <CardBody className="p-3 sm:p-4">
+          <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
             <MetricBlock
               accent={Number(today?.net_pnl ?? 0) >= 0 ? "success" : "danger"}
               helper={`Gross ${formatCurrency(today?.gross_pnl)}`}
@@ -75,79 +75,85 @@ export function DailyScalpPanel({ performance, positions, orders }: Props) {
               })}
             />
           </div>
-          <div className="mt-6 rounded-2xl border border-finance-green-30/60 bg-black/15 p-4">
+          <div className="mt-4 sm:mt-6 rounded-2xl border border-finance-green-30/60 bg-black/15 p-3 sm:p-4">
             <p className="text-xs uppercase tracking-[0.3em] text-finance-green-70">
               Recent Trend
             </p>
-            <Table
-              removeWrapper
-              aria-label="Daily scalp performance trend"
-              className="mt-3 min-w-[420px]"
-            >
-              <TableHeader>
-                <TableColumn>Date</TableColumn>
-                <TableColumn>Trades</TableColumn>
-                <TableColumn>Net PnL</TableColumn>
-                <TableColumn>Win Rate</TableColumn>
-                <TableColumn>Sharpe</TableColumn>
-              </TableHeader>
-              <TableBody
-                emptyContent="Waiting for scalp data."
-                items={pnlTrend}
+            <div className="mt-3 overflow-x-auto">
+              <Table
+                removeWrapper
+                aria-label="Daily scalp performance trend"
+                className="min-w-[420px]"
               >
-                {(row) => (
-                  <TableRow key={row.trade_date}>
-                    <TableCell>{row.trade_date}</TableCell>
-                    <TableCell>
-                      {formatNumber(row.total_trades, {
-                        maximumFractionDigits: 0,
-                      })}
-                    </TableCell>
-                    <TableCell
-                      className={
-                        Number(row.net_pnl ?? 0) >= 0
-                          ? "text-green-400"
-                          : "text-red-400"
-                      }
-                    >
-                      {formatCurrency(row.net_pnl)}
-                    </TableCell>
-                    <TableCell>{formatPercent(row.win_rate, 0)}</TableCell>
-                    <TableCell>
-                      {formatNumber(row.sharpe_ratio, {
-                        maximumFractionDigits: 2,
-                      })}
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
+                <TableHeader>
+                  <TableColumn>Date</TableColumn>
+                  <TableColumn>Trades</TableColumn>
+                  <TableColumn>Net PnL</TableColumn>
+                  <TableColumn>Win Rate</TableColumn>
+                  <TableColumn>Sharpe</TableColumn>
+                </TableHeader>
+                <TableBody
+                  emptyContent="Waiting for scalp data."
+                  items={pnlTrend}
+                >
+                  {(row) => (
+                    <TableRow key={row.trade_date}>
+                      <TableCell>{row.trade_date}</TableCell>
+                      <TableCell>
+                        {formatNumber(row.total_trades, {
+                          maximumFractionDigits: 0,
+                        })}
+                      </TableCell>
+                      <TableCell
+                        className={
+                          Number(row.net_pnl ?? 0) >= 0
+                            ? "text-green-400"
+                            : "text-red-400"
+                        }
+                      >
+                        {formatCurrency(row.net_pnl)}
+                      </TableCell>
+                      <TableCell>{formatPercent(row.win_rate, 0)}</TableCell>
+                      <TableCell>
+                        {formatNumber(row.sharpe_ratio, {
+                          maximumFractionDigits: 2,
+                        })}
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </div>
           </div>
         </CardBody>
       </Card>
 
-      <div className="flex flex-col gap-6 lg:col-span-2">
+      <div className="flex flex-col gap-4 sm:gap-6 lg:col-span-2">
         <Card className="border border-finance-green-25 bg-finance-surface-70/80 shadow-2xl backdrop-blur-xl">
-          <CardHeader className="flex items-center justify-between">
+          <CardHeader className="flex items-center justify-between p-3 sm:p-4">
             <div>
               <p className="text-xs uppercase tracking-[0.35em] text-finance-green-70">
                 Active Positions
               </p>
-              <h3 className="text-lg font-semibold text-white">Live Trades</h3>
+              <h3 className="text-base sm:text-lg font-semibold text-white">
+                Live Trades
+              </h3>
             </div>
             <Icon
-              className="text-xl text-finance-green-60"
+              className="text-lg sm:text-xl text-finance-green-60"
               icon="solar:target-line-duotone"
             />
           </CardHeader>
-          <CardBody className="flex flex-col gap-3">
+          <CardBody className="flex flex-col gap-3 p-3 sm:p-4">
             {positions.length === 0 ? (
-              <p className="text-sm text-zinc-400">No open positions.</p>
+              <p className="text-xs sm:text-sm text-zinc-400">
+                No open positions.
+              </p>
             ) : (
               positions.map((position) => (
                 <div
                   key={position.id}
-                  className="flex flex-col gap-2 rounded-2xl border border-finance-green-30/60 bg-black/15 p-4"
+                  className="flex flex-col gap-2 rounded-2xl border border-finance-green-30/60 bg-black/15 p-3 sm:p-4"
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
@@ -166,7 +172,10 @@ export function DailyScalpPanel({ performance, positions, orders }: Props) {
                         {position.side}
                       </Chip>
                     </div>
-                    <p className="text-xs text-zinc-400">
+                    <p
+                      suppressHydrationWarning
+                      className="text-xs text-zinc-400"
+                    >
                       {formatDateTime(position.entry_timestamp)}
                     </p>
                   </div>
@@ -199,28 +208,30 @@ export function DailyScalpPanel({ performance, positions, orders }: Props) {
         </Card>
 
         <Card className="border border-finance-green-25 bg-finance-surface-70/80 shadow-2xl backdrop-blur-xl">
-          <CardHeader className="flex items-center justify-between">
+          <CardHeader className="flex items-center justify-between p-3 sm:p-4">
             <div>
               <p className="text-xs uppercase tracking-[0.35em] text-finance-green-70">
                 Execution Queue
               </p>
-              <h3 className="text-lg font-semibold text-white">
+              <h3 className="text-base sm:text-lg font-semibold text-white">
                 Pending Orders
               </h3>
             </div>
             <Icon
-              className="text-xl text-finance-green-60"
+              className="text-lg sm:text-xl text-finance-green-60"
               icon="solar:clipboard-list-linear"
             />
           </CardHeader>
-          <CardBody className="flex flex-col gap-3">
+          <CardBody className="flex flex-col gap-3 p-3 sm:p-4">
             {orders.length === 0 ? (
-              <p className="text-sm text-zinc-400">No queued orders.</p>
+              <p className="text-xs sm:text-sm text-zinc-400">
+                No queued orders.
+              </p>
             ) : (
               orders.map((order) => (
                 <div
                   key={order.id}
-                  className="flex items-start justify-between gap-3 rounded-2xl border border-finance-green-30/60 bg-black/15 p-4"
+                  className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 sm:gap-3 rounded-2xl border border-finance-green-30/60 bg-black/15 p-3 sm:p-4"
                 >
                   <div>
                     <div className="flex items-center gap-2">
@@ -261,7 +272,9 @@ export function DailyScalpPanel({ performance, positions, orders }: Props) {
                       })}
                     </p>
                     <p>Confidence {formatPercent(order.confidence_score, 0)}</p>
-                    <p>{formatDateTime(order.created_at)}</p>
+                    <p suppressHydrationWarning>
+                      {formatDateTime(order.created_at)}
+                    </p>
                   </div>
                 </div>
               ))

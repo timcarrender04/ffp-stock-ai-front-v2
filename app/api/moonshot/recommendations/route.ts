@@ -30,15 +30,16 @@ const DEFAULT_COLUMNS = [
 ];
 
 export async function GET(request: Request) {
-  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  const kongUrl =
-    process.env.SUPABASE_KONG_URL ||
+  // Use direct PostgREST URL (localhost:54321 for local dev, kong:8000 for Docker)
+  // This bypasses Kong's JWT validation which causes issues with mismatched keys
+  const postgrestUrl =
+    process.env.POSTGREST_URL ||
     process.env.SUPABASE_URL ||
     process.env.NEXT_PUBLIC_SUPABASE_URL;
 
-  if (!serviceRoleKey || !kongUrl) {
+  if (!postgrestUrl) {
     return NextResponse.json(
-      { error: "Supabase configuration missing" },
+      { error: "PostgREST configuration missing" },
       { status: 500 },
     );
   }
@@ -47,7 +48,9 @@ export async function GET(request: Request) {
   const limit = searchParams.get("limit") ?? "25";
   const columns = searchParams.get("select") || DEFAULT_COLUMNS.join(",");
 
-  const url = new URL(`${kongUrl.replace(/\/$/, "")}/rest/v1/${TABLE_NAME}`);
+  const url = new URL(
+    `${postgrestUrl.replace(/\/$/, "")}/rest/v1/${TABLE_NAME}`,
+  );
 
   url.searchParams.set("select", columns);
   url.searchParams.set("order", "composite_score.desc");
@@ -55,14 +58,12 @@ export async function GET(request: Request) {
   url.searchParams.set("execution_status", "neq.closed");
   url.searchParams.set("trade_decision", "eq.true");
 
-  // Headers for Supabase REST API
+  // Headers for PostgREST - specify the moonshot schema
   const headers: Record<string, string> = {
-    apikey: serviceRoleKey,
-    Authorization: `Bearer ${serviceRoleKey}`,
-    "Content-Type": "application/json",
-    Prefer: "return=representation",
     "Accept-Profile": SCHEMA_PROFILE,
     "Content-Profile": SCHEMA_PROFILE,
+    "Content-Type": "application/json",
+    Prefer: "return=representation",
   };
 
   try {
@@ -106,4 +107,3 @@ function safeParse(payload: string) {
     return payload;
   }
 }
-

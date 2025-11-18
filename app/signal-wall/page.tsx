@@ -1,5 +1,6 @@
 import { Metadata } from "next";
 
+import { PreMarketSnapshot } from "@/components/dashboard/PreMarketSnapshot";
 import { RotatingSignalWall } from "@/components/dashboard/RotatingSignalWall";
 
 export const metadata: Metadata = {
@@ -9,5 +10,10 @@ export const metadata: Metadata = {
 };
 
 export default function SignalWallPage() {
-  return <RotatingSignalWall />;
+  return (
+    <div className="flex flex-col gap-8">
+      <PreMarketSnapshot />
+      <RotatingSignalWall />
+    </div>
+  );
 }

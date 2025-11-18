@@ -5,10 +5,12 @@ import { NextResponse } from "next/server";
 import { createSupabaseMiddlewareClient } from "@/lib/supabase/middleware";
 
 const AUTH_PATH = "/login";
+const SIGNUP_PATH = "/signup";
 
 function isPublicPath(pathname: string) {
   return (
     pathname === AUTH_PATH ||
+    pathname === SIGNUP_PATH ||
     pathname.startsWith("/api/") ||
     pathname.startsWith("/_next") ||
     pathname.startsWith("/favicon") ||
@@ -44,26 +46,44 @@ export async function middleware(req: NextRequest) {
 
     return NextResponse.next();
   }
+
+  const pathname = req.nextUrl.pathname;
+
+  // Get session first (needed for login page redirect)
   const {
     data: { session },
   } = await supabaseClient.auth.getSession();
 
-  const pathname = req.nextUrl.pathname;
+  // If authenticated and on login or signup page, redirect to home or redirectTo
+  if (session && (pathname === AUTH_PATH || pathname === SIGNUP_PATH)) {
+    const redirectTo = req.nextUrl.searchParams.get("redirectTo") || "/";
+    // Ensure redirectTo is a valid path (prevent open redirects)
+    const safeRedirectTo = redirectTo.startsWith("/") ? redirectTo : "/";
+    // Use absolute URL for redirect
+    const baseUrl = new URL(req.url);
+    const redirectUrl = new URL(safeRedirectTo, baseUrl.origin);
 
-  if (!session && !isPublicPath(pathname)) {
-    const redirectUrl = req.nextUrl.clone();
+    redirectUrl.search = ""; // Clear query params
 
-    redirectUrl.pathname = AUTH_PATH;
-    redirectUrl.searchParams.set("redirectTo", pathname);
+    // eslint-disable-next-line no-console
+    console.log(
+      `[Middleware] Authenticated user on ${pathname} page, redirecting to: ${redirectUrl.toString()}`,
+    );
 
     return NextResponse.redirect(redirectUrl);
   }
 
-  if (session && pathname === AUTH_PATH) {
+  // Skip auth check for public paths (but only if not authenticated)
+  if (isPublicPath(pathname)) {
+    return response;
+  }
+
+  // If no session and not on login page, redirect to login
+  if (!session) {
     const redirectUrl = req.nextUrl.clone();
 
-    redirectUrl.pathname = "/";
-    redirectUrl.searchParams.delete("redirectTo");
+    redirectUrl.pathname = AUTH_PATH;
+    redirectUrl.searchParams.set("redirectTo", pathname);
 
     return NextResponse.redirect(redirectUrl);
   }
